@@ -5,12 +5,16 @@ export var acceleration = 20
 export var gravity = 10
 export var jump = 7
 export var mouse_sensitivity = 0.2
+export var damage = 10
 var mouse_locked
 var direction = Vector3()
 var velocity = Vector3()
 var fall = Vector3()
+var colliding = false
 
 onready var head = $Head
+onready var aim_cast = $Head/Camera/AimCast
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	#locks the mouse to the screen and makes it invisible
@@ -23,10 +27,11 @@ func _input(event): # runs when detects user input
 		rotate_y(deg2rad(-event.relative.x * mouse_sensitivity))
 	
 		# rotates head so that body doesn't end up at odd angles
-		head.rotate_x(deg2rad(event.relative.y * mouse_sensitivity))
+		head.rotate_x(deg2rad(-event.relative.y * mouse_sensitivity))
 	
 		# so you can't invert your look
-		head.rotation.x = clamp(head.rotation.x, deg2rad(-90), deg2rad(90))
+		head.rotation.x = clamp(head.rotation.x, deg2rad(-80), deg2rad(50))
+
 
 # a _physics_process runs once every 60th of a second precisely, a _process runs
 # 60 times per second, but not necessarily at even intervals. "delta" is the time between
@@ -50,18 +55,37 @@ func _process(delta):
 	if Input.is_action_just_pressed("jump") and is_on_floor(): # so player cant jump in air
 		fall.y = jump
 	
+	# tries to fire the gun on a left-click
+	if Input.is_action_just_pressed("ui_fire"):
+		# makes sure that the aimcast is colliding and that it is hitting an enemy
+		if aim_cast.is_colliding() and aim_cast.get_collider().is_in_group("Enemy"):
+			# tells the target to run a function called 'get_hit' and passes through the
+			# amount of damage
+			aim_cast.get_collider().get_hit(damage)
+	
+	# sees if the aimcast is colliding while we weren't previously
+	if aim_cast.is_colliding() and not colliding:
+		# checks if the target is an enemy
+		if aim_cast.get_collider().is_in_group("Enemy"):
+			# updates to say we are colliding, then updates the global variable to say so
+			colliding = true
+			Global.set_crosshairs("enemy")
+	elif aim_cast.is_colliding() == false and colliding:
+		colliding = false
+		Global.set_crosshairs("neutral")
+	
 	# is_action_pressed is for seeing if the button is held and re-executing the command
 	if Input.is_action_pressed("ui_down"):
-		direction -= transform.basis.z
-	
-	if Input.is_action_pressed("ui_up"):
 		direction += transform.basis.z
 	
+	if Input.is_action_pressed("ui_up"):
+		direction -= transform.basis.z
+	
 	if Input.is_action_pressed("ui_left"):
-		direction += transform.basis.x
+		direction -= transform.basis.x
 	
 	if Input.is_action_pressed("ui_right"):
-		direction -= transform.basis.x
+		direction += transform.basis.x
 	
 	direction = direction.normalized() # for turning
 	# next two lines for moving smoothly
