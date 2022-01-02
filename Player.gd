@@ -2,8 +2,8 @@ extends KinematicBody
 
 export var speed = 10
 export var acceleration = 20
-export var gravity = 10
-export var jump = 7
+export var gravity = 30
+export var jump = 14
 export var mouse_sensitivity = 0.2
 export var damage = 10
 var mouse_locked
@@ -12,14 +12,22 @@ var velocity = Vector3()
 var fall = Vector3()
 var colliding = false
 
+onready var weapon = $Head/Weapon
 onready var head = $Head
-onready var aim_cast = $Head/Camera/AimCast
+onready var aim_cast = $Head/Weapon/AimCast
+onready var climb_cast = $Head/Camera/ClimbCast
+onready var climb_shape = $ClimbShape
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	#locks the mouse to the screen and makes it invisible
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	mouse_locked = true
+	
+	weapon.connect("reloading", self, "update_global_reload")
+
+func update_global_reload(value):
+	Global.set_reloading(value)
 
 func _input(event): # runs when detects user input
 	if event is InputEventMouseMotion: # player looks around
@@ -52,26 +60,25 @@ func _process(delta):
 	
 	if not is_on_floor(): # gravity
 		fall.y -= gravity * delta
+		
 	if Input.is_action_just_pressed("jump") and is_on_floor(): # so player cant jump in air
 		fall.y = jump
+		climb_cast.enabled = true
 	
 	# tries to fire the gun on a left-click
 	if Input.is_action_just_pressed("ui_fire"):
 		# makes sure that the aimcast is colliding and that it is hitting an enemy
-		if aim_cast.is_colliding() and aim_cast.get_collider().is_in_group("Enemy"):
-			# tells the target to run a function called 'get_hit' and passes through the
-			# amount of damage
-			aim_cast.get_collider().get_hit(damage)
+		weapon.fire()
 	
 	# sees if the aimcast is colliding while we weren't previously
-	if aim_cast.is_colliding() and not colliding:
+	if aim_cast.is_colliding():
 		# checks if the target is an enemy
 		if aim_cast.get_collider().is_in_group("Enemy"):
 			# updates to say we are colliding, then updates the global variable to say so
 			colliding = true
 			Global.set_crosshairs("enemy")
-	elif aim_cast.is_colliding() == false and colliding:
-		colliding = false
+		else: Global.set_crosshairs("neutral")
+	elif aim_cast.is_colliding() == false:
 		Global.set_crosshairs("neutral")
 	
 	# is_action_pressed is for seeing if the button is held and re-executing the command

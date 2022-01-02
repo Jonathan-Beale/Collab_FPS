@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://GenericGun.gd" type="Script" id=1]
+
+[node name="GunBase" type="Spatial"]
+script = ExtResource( 1 )
+
+[node name="AimCast" type="RayCast" parent="."]
+enabled = true
+cast_to = Vector3( 0, 0, -10 )
+
+[node name="SpotLight" type="SpotLight" parent="."]
+visible = false
+light_energy = 16.0
+spot_range = 15.0702
+spot_angle = 16.3397

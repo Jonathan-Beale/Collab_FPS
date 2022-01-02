@@ -20,3 +20,14 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Reloading" type="Label" parent="."]
+margin_top = 527.412
+margin_right = 118.0
+margin_bottom = 596.412
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 2
+custom_constants/shadow_offset_y = 2
+text = "Reloading"
+align = 1
+valign = 1

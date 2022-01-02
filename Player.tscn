@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Player.gd" type="Script" id=1]
+[ext_resource path="res://GenericGun.tscn" type="PackedScene" id=2]
 
 [sub_resource type="CapsuleShape" id=1]
 
@@ -17,10 +18,14 @@ script = ExtResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7997e-07, 3.50079, -1.06731 )
 
 [node name="Camera" type="Camera" parent="Head"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.34827 )
 
-[node name="AimCast" type="RayCast" parent="Head/Camera"]
+[node name="ClimbCast" type="RayCast" parent="Head/Camera"]
 enabled = true
-cast_to = Vector3( 0, 0, -10 )
+cast_to = Vector3( 0, 0, -1 )
+collision_mask = 4
+
+[node name="Weapon" parent="Head" instance=ExtResource( 2 )]
 
 [node name="BodyShape" type="CollisionShape" parent="."]
 transform = Transform( 1, 7.10543e-15, 0, 2.7953e-22, -1.62921e-07, -1, -7.10543e-15, 1, -1.62921e-07, 0, 1.5, 0 )
